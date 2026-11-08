@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Marées Saint-Malo</title>
+<style>
+  :root{--bg:#f4f7fa;--card:#fff;--txt:#14222e;--mut:#6a7b8a;--line:#d9e1e8;--sea:#1f78c8;--ok:#1fa35c;--thr:#e0562b}
+  @media (prefers-color-scheme:dark){:root{--bg:#0e161d;--card:#16212a;--txt:#e6eef4;--mut:#8ea0b0;--line:#26343f;--sea:#4aa3ee;--ok:#2fc274;--thr:#ff7a4d}}
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--txt);padding:12px;padding-top:max(12px,env(safe-area-inset-top));padding-bottom:max(12px,env(safe-area-inset-bottom));max-width:1000px;margin:0 auto}
+  h1{font-size:1.2rem;margin:0 0 10px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:12px}
+  .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  label{font-size:.85rem;color:var(--mut)}
+  input[type=number],input[type=date]{font:inherit;color:var(--txt);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:6px 8px}
+  input[type=number]{width:5.5rem}
+  button{font:inherit;color:var(--txt);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 11px;cursor:pointer}
+  button:active{background:var(--line)}
+  .thr{display:flex;align-items:center;gap:10px;flex:1;min-width:230px}
+  .thr input[type=range]{flex:1;accent-color:var(--thr)}
+  .big{font-weight:700;color:var(--thr)}
+  #wrap{position:relative;height:340px;touch-action:none;user-select:none}
+  canvas{width:100%;height:100%;display:block}
+  #info{font-size:.9rem;margin-top:6px;min-height:1.3em}
+  .day{margin-bottom:10px}
+  .day h3{margin:0 0 4px;font-size:.95rem;text-transform:capitalize}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{padding:4px 9px;border-radius:99px;font-size:.88rem;border:1px solid var(--line)}
+  .chip.ok{background:color-mix(in srgb,var(--ok) 18%,transparent);border-color:var(--ok)}
+  .chip.no{color:var(--mut)}
+  .small{font-size:.8rem;color:var(--mut);line-height:1.4}
+  details summary{cursor:pointer;font-size:.9rem}
+</style>
+</head>
+<body>
+<h1>🌊 Marées de Saint-Malo</h1>
+
+<div class="card">
+  <div class="row">
+    <div class="thr">
+      <label for="thrNum">Mon seuil d'eau</label>
+      <input id="thrNum" type="number" step="0.1" min="0" max="13" value="4"> <span>m</span>
+      <input id="thrRange" type="range" min="0" max="13" step="0.1" value="4">
+    </div>
+  </div>
+  <div class="row" style="margin-top:10px">
+    <button id="prev">◀ Jour</button>
+    <input id="date" type="date">
+    <button id="next">Jour ▶</button>
+    <button id="today">Aujourd'hui</button>
+    <button id="zoomIn">＋</button>
+    <button id="zoomOut">－</button>
+  </div>
+</div>
+
+<div class="card">
+  <div id="wrap"><canvas id="cv"></canvas></div>
+  <div id="info" class="small">Glisse la courbe au doigt (ou à la souris), pince/molette pour zoomer, touche un point pour lire l'heure et la hauteur.</div>
+</div>
+
+<div class="card">
+  <strong>Créneaux où l'eau est <span class="big">au-dessus</span> de <span class="big" id="thrLbl">4,0 m</span></strong>
+  <div id="list" style="margin-top:8px"></div>
+</div>
+
+<div class="card">
+  <details>
+    <summary>Réglages de calage</summary>
+    <p class="small">Les hauteurs sont calculées par un modèle harmonique approché (hauteurs au-dessus du zéro hydrographique), pas les prédictions officielles du SHOM. Compare avec le SHOM / maree.info et corrige ici si besoin : l'écart se règle une fois pour toutes.</p>
+    <div class="row">
+      <label>Décalage horaire (min) <input id="offT" type="number" step="1" value="0"></label>
+      <label>Décalage hauteur (cm) <input id="offH" type="number" step="1" value="0"></label>
+      <button id="reset">Réinitialiser</button>
+    </div>
+  </details>
+</div>
+
+<script>
+(function(){
+'use strict';
+const TZ='Europe/Paris', MIN=60000, HOUR=3600000, DAY=86400000;
+const RAD=Math.PI/180;
+
+/* ---------- Modèle harmonique Saint-Malo (approximation) ---------- */
+const Z0=6.75;
+// V0 = [T, s, h, p] coefficients ; A amplitude (m) ; g phase (deg)
+const C=[
+ {n:'M2', A:3.10,g:178,c:[2,-2,2,0],o:0,nod:'M2'},
+ {n:'S2', A:1.16,g:215,c:[2,0,0,0],o:0},
+ {n:'N2', A:0.62,g:160,c:[2,-3,2,1],o:0,nod:'M2'},
+ {n:'K2', A:0.33,g:212,c:[2,0,2,0],o:0},
+ {n:'K1', A:0.07,g:100,c:[1,0,1,0],o:-90},
+ {n:'O1', A:0.07,g:330,c:[1,-2,1,0],o:90},
+ {n:'M4', A:0.15,g:60 ,c:[4,-4,4,0],o:0,nod:'M4'},
+ {n:'MS4',A:0.10,g:100,c:[4,-2,2,0],o:0}
+];
+let offT=0, offH=0;
+function rawHeight(ms){
+  ms-=offT*MIN;
+  const T=(ms-Date.UTC(2000,0,1,12))/DAY/36525;
+  const ut=(ms/HOUR)%24;
+  const Th=15*ut+180;
+  const s=218.3165+481267.8813*T, h=280.4661+36000.7698*T, p=83.3532+4069.0137*T;
+  const N=125.04-1934.136*T;
+  const fM2=1-0.037*Math.cos(N*RAD);
+  let z=Z0;
+  for(const k of C){
+    const V=k.c[0]*Th+k.c[1]*s+k.c[2]*h+k.c[3]*p+k.o;
+    const f=k.nod==='M2'?fM2:(k.nod==='M4'?fM2*fM2:1);
+    z+=k.A*f*Math.cos((V-k.g)*RAD);
+  }
+  return z+offH/100;
+}
+
+/* ---------- Heure de Paris ---------- */
+const fmtParts=new Intl.DateTimeFormat('en-US',{timeZone:TZ,hourCycle:'h23',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+function tzOffset(ms){
+  const o={};fmtParts.formatToParts(new Date(ms)).forEach(p=>o[p.type]=+p.value);
+  return Date.UTC(o.year,o.month-1,o.day,o.hour,o.minute,o.second)-Math.floor(ms/1000)*1000;
+}
+function parisMidnight(y,m,d){ // m: 0-11
+  let g=Date.UTC(y,m,d);
+  let r=g-tzOffset(g); r=g-tzOffset(r); return r;
+}
+function ymd(ms){
+  const o={};fmtParts.formatToParts(new Date(ms)).forEach(p=>o[p.type]=+p.value);
+  return {y:o.year,m:o.month-1,d:o.day};
+}
+const fT=new Intl.DateTimeFormat('fr-FR',{timeZone:TZ,hour:'2-digit',minute:'2-digit'});
+const fD=new Intl.DateTimeFormat('fr-FR',{timeZone:TZ,weekday:'long',day:'numeric',month:'long'});
+const fDS=new Intl.DateTimeFormat('fr-FR',{timeZone:TZ,weekday:'short',day:'numeric',month:'short'});
+const hhmm=ms=>fT.format(new Date(ms)).replace(':','h');
+const nf=v=>v.toFixed(2).replace('.',',');
+const pad=n=>String(n).padStart(2,'0');
+function dayStart(ms){const a=ymd(ms);return parisMidnight(a.y,a.m,a.d);}
+function addDays(ms,n){const a=ymd(ms+12*HOUR);return parisMidnight(a.y,a.m,a.d+n);}
+
+/* ---------- Bornes ---------- */
+const RANGE_MIN=dayStart(Date.now());
+const RANGE_MAX=parisMidnight(2028,0,1);
+
+/* ---------- État ---------- */
+let thr=4, span=48*HOUR, vStart=dayStart(Date.now()), cursor=null;
+try{
+  const s=JSON.parse(localStorage.getItem('maree-sm')||'{}');
+  if(typeof s.thr==='number')thr=s.thr;
+  if(typeof s.offT==='number')offT=s.offT;
+  if(typeof s.offH==='number')offH=s.offH;
+}catch(e){}
+function save(){try{localStorage.setItem('maree-sm',JSON.stringify({thr,offT,offH}));}catch(e){}}
+
+const $=id=>document.getElementById(id);
+const cv=$('cv'),ctx=cv.getContext('2d'),wrap=$('wrap');
+let W=0,H=0,dpr=1;
+const YMAX=14;
+const PAD={l:34,r:10,t:10,b:26};
+
+function resize(){
+  dpr=window.devicePixelRatio||1;
+  W=wrap.clientWidth;H=wrap.clientHeight;
+  cv.width=W*dpr;cv.height=H*dpr;
+  draw();
+}
+const xOf=t=>PAD.l+(t-vStart)/span*(W-PAD.l-PAD.r);
+const tOf=x=>vStart+(x-PAD.l)/(W-PAD.l-PAD.r)*span;
+const yOf=v=>PAD.t+(1-v/YMAX)*(H-PAD.t-PAD.b);
+
+function clampView(){
+  span=Math.max(6*HOUR,Math.min(span,14*DAY));
+  const maxStart=RANGE_MAX-span;
+  vStart=Math.max(RANGE_MIN,Math.min(vStart,maxStart));
+}
+
+function cssVar(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
+
+function draw(){
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,W,H);
+  const cTxt=cssVar('--mut'),cLine=cssVar('--line'),cSea=cssVar('--sea'),cOk=cssVar('--ok'),cThr=cssVar('--thr');
+  ctx.font='11px system-ui,sans-serif';
+  // grille hauteurs
+  ctx.textAlign='right';ctx.textBaseline='middle';
+  for(let v=0;v<=YMAX;v+=2){
+    const y=yOf(v);ctx.strokeStyle=cLine;ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(PAD.l,y);ctx.lineTo(W-PAD.r,y);ctx.stroke();
+    ctx.fillStyle=cTxt;ctx.fillText(v+' m',PAD.l-4,y);
+  }
+  // grille temps
+  ctx.textAlign='center';ctx.textBaseline='top';
+  let stepH=span<=12*HOUR?1:span<=30*HOUR?3:span<=3*DAY?6:12;
+  const dayMode=span>4*DAY;
+  if(!dayMode){
+    let t0=dayStart(vStart);
+    for(let t=t0;t<=vStart+span;t+=HOUR){
+      if(t<vStart)continue;
+      const hh=+fT.format(new Date(t)).slice(0,2);
+      if(hh%stepH)continue;
+      const x=xOf(t);
+      ctx.strokeStyle=cLine;ctx.beginPath();ctx.moveTo(x,PAD.t);ctx.lineTo(x,H-PAD.b);ctx.stroke();
+      ctx.fillStyle=cTxt;
+      ctx.fillText(hh===0?fDS.format(new Date(t)):hh+'h',x,H-PAD.b+6);
+    }
+  }else{
+    for(let t=dayStart(vStart);t<=vStart+span;t=addDays(t,1)){
+      if(t<vStart)continue;
+      const x=xOf(t);
+      ctx.strokeStyle=cLine;ctx.beginPath();ctx.moveTo(x,PAD.t);ctx.lineTo(x,H-PAD.b);ctx.stroke();
+      if(span<=9*DAY||ymd(t).d%2===1){ctx.fillStyle=cTxt;ctx.fillText(fDS.format(new Date(t)),x,H-PAD.b+6);}
+    }
+  }
+  // courbe
+  const n=Math.max(2,Math.floor(W-PAD.l-PAD.r));
+  const pts=[];
+  for(let i=0;i<=n;i++){const x=PAD.l+i;pts.push([x,yOf(rawHeight(tOf(x)))]);}
+  ctx.save();
+  ctx.beginPath();ctx.rect(PAD.l,PAD.t,W-PAD.l-PAD.r,H-PAD.t-PAD.b);ctx.clip();
+  // zone au-dessus du seuil
+  ctx.save();
+  ctx.beginPath();ctx.rect(PAD.l,PAD.t,W-PAD.l-PAD.r,yOf(thr)-PAD.t);ctx.clip();
+  ctx.beginPath();ctx.moveTo(pts[0][0],yOf(thr));
+  pts.forEach(p=>ctx.lineTo(p[0],p[1]));
+  ctx.lineTo(pts[pts.length-1][0],H);ctx.lineTo(pts[0][0],H);ctx.closePath();
+  ctx.fillStyle=cOk;ctx.globalAlpha=.3;ctx.fill();ctx.restore();
+  // ligne
+  ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));
+  ctx.strokeStyle=cSea;ctx.lineWidth=2.2;ctx.stroke();
+  // seuil
+  ctx.setLineDash([6,4]);ctx.strokeStyle=cThr;ctx.lineWidth=1.6;
+  ctx.beginPath();ctx.moveTo(PAD.l,yOf(thr));ctx.lineTo(W-PAD.r,yOf(thr));ctx.stroke();ctx.setLineDash([]);
+  // maintenant
+  const now=Date.now();
+  if(now>=vStart&&now<=vStart+span){
+    const x=xOf(now);ctx.strokeStyle=cTxt;ctx.lineWidth=1;ctx.setLineDash([2,3]);
+    ctx.beginPath();ctx.moveTo(x,PAD.t);ctx.lineTo(x,H-PAD.b);ctx.stroke();ctx.setLineDash([]);
+  }
+  // curseur
+  if(cursor!==null&&cursor>=vStart&&cursor<=vStart+span){
+    const x=xOf(cursor),v=rawHeight(cursor),y=yOf(v);
+    ctx.strokeStyle=cTxt;ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(x,PAD.t);ctx.lineTo(x,H-PAD.b);ctx.stroke();
+    ctx.fillStyle=cSea;ctx.beginPath();ctx.arc(x,y,5,0,7);ctx.fill();
+    ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();
+  }
+  ctx.restore();
+  // info
+  const mid=cursor!==null?cursor:vStart+span/2;
+  const v=rawHeight(mid);
+  $('info').innerHTML=(cursor!==null?'📍 ':'Centre : ')+'<strong>'+fDS.format(new Date(mid))+' à '+hhmm(mid)+'</strong> — <strong>'+nf(v)+' m</strong> '+(v>=thr?'<span style="color:var(--ok)">(au-dessus du seuil)</span>':'<span style="color:var(--thr)">(sous le seuil)</span>');
+}
+
+/* ---------- Liste des créneaux ---------- */
+function analyseDay(t0,t1){
+  const step=MIN, arr=[];
+  for(let t=t0;t<=t1;t+=step)arr.push(rawHeight(t));
+  // fenêtres
+  const wins=[];let start=null;
+  for(let i=0;i<arr.length;i++){
+    const t=t0+i*step,above=arr[i]>=thr;
+    if(above&&start===null)start=(i===0)?t0:t;
+    if(!above&&start!==null){wins.push([start,t]);start=null;}
+  }
+  if(start!==null)wins.push([start,t1]);
+  // extrema
+  const ext=[];
+  for(let i=1;i<arr.length-1;i++){
+    if(arr[i]>arr[i-1]&&arr[i]>=arr[i+1])ext.push({t:t0+i*step,v:arr[i],hi:true});
+    else if(arr[i]<arr[i-1]&&arr[i]<=arr[i+1])ext.push({t:t0+i*step,v:arr[i],hi:false});
+  }
+  return {wins,ext};
+}
+function renderList(){
+  $('thrLbl').textContent=nf(thr).replace(',00',',0').replace(/(\,\d)0$/,'$1')+' m';
+  const box=$('list');box.innerHTML='';
+  let t0=dayStart(vStart+span/2<RANGE_MIN?RANGE_MIN:vStart+(cursor!==null?0:0));
+  const base=cursor!==null?dayStart(cursor):dayStart(vStart+Math.min(span/2,12*HOUR));
+  for(let i=0;i<3;i++){
+    const a=addDays(base,i),b=addDays(base,i+1);
+    if(a>=RANGE_MAX)break;
+    const {wins,ext}=analyseDay(a,b);
+    const d=document.createElement('div');d.className='day';
+    let html='<h3>'+fD.format(new Date(a))+'</h3><div class="chips">';
+    if(!wins.length)html+='<span class="chip no">Jamais au-dessus du seuil</span>';
+    else if(wins.length===1&&wins[0][0]===a&&wins[0][1]===b)html+='<span class="chip ok">Toute la journée</span>';
+    else wins.forEach(w=>{html+='<span class="chip ok">'+(w[0]===a?'dès 00h00':hhmm(w[0]))+' → '+(w[1]===b?'minuit':hhmm(w[1]))+'</span>';});
+    html+='</div><div class="small" style="margin-top:4px">';
+    html+=ext.map(e=>(e.hi?'▲ PM ':'▼ BM ')+hhmm(e.t)+' ('+nf(e.v)+' m)').join(' · ');
+    html+='</div>';
+    d.innerHTML=html;box.appendChild(d);
+  }
+}
+
+function syncUI(){
+  const a=ymd(vStart+Math.min(span/2,12*HOUR));
+  $('date').value=a.y+'-'+pad(a.m+1)+'-'+pad(a.d);
+  $('date').min=(()=>{const m=ymd(RANGE_MIN);return m.y+'-'+pad(m.m+1)+'-'+pad(m.d);})();
+  $('date').max='2027-12-31';
+  $('thrNum').value=thr;$('thrRange').value=thr;
+  $('offT').value=offT;$('offH').value=offH;
+}
+let rq=false;
+function refresh(full){
+  clampView();draw();
+  if(full){renderList();syncUI();}
+}
+
+/* ---------- Interactions ---------- */
+const ptrs=new Map();let lastX=0,pinchD=0,moved=0,downX=0;
+wrap.addEventListener('pointerdown',e=>{
+  wrap.setPointerCapture(e.pointerId);
+  ptrs.set(e.pointerId,e.clientX);
+  moved=0;downX=e.clientX;lastX=e.clientX;
+  if(ptrs.size===2){const v=[...ptrs.values()];pinchD=Math.abs(v[0]-v[1]);}
+});
+wrap.addEventListener('pointermove',e=>{
+  const r=wrap.getBoundingClientRect();
+  if(!ptrs.has(e.pointerId)){ // survol souris
+    if(e.pointerType==='mouse'){cursor=tOf(e.clientX-r.left);draw();}
+    return;
+  }
+  ptrs.set(e.pointerId,e.clientX);
+  if(ptrs.size===2){
+    const v=[...ptrs.values()],d=Math.abs(v[0]-v[1]);
+    if(pinchD>0){
+      const cx=(v[0]+v[1])/2-r.left,tc=tOf(cx);
+      span=span*pinchD/d;
+      vStart=tc-(cx-PAD.l)/(W-PAD.l-PAD.r)*span;
+    }
+    pinchD=d;moved=99;refresh(false);return;
+  }
+  const dx=e.clientX-lastX;lastX=e.clientX;moved+=Math.abs(dx);
+  if(moved>4){vStart-=dx/(W-PAD.l-PAD.r)*span;cursor=null;refresh(false);}
+});
+function up(e){
+  const was=ptrs.has(e.pointerId);ptrs.delete(e.pointerId);pinchD=0;
+  if(!was)return;
+  if(moved<=4&&ptrs.size===0){const r=wrap.getBoundingClientRect();cursor=tOf(e.clientX-r.left);}
+  refresh(true);
+}
+wrap.addEventListener('pointerup',up);
+wrap.addEventListener('pointercancel',up);
+wrap.addEventListener('wheel',e=>{
+  e.preventDefault();
+  const r=wrap.getBoundingClientRect(),cx=e.clientX-r.left,tc=tOf(cx);
+  if(e.shiftKey||Math.abs(e.deltaX)>Math.abs(e.deltaY)){vStart+=(e.deltaX||e.deltaY)/(W)*span;}
+  else{span*=e.deltaY>0?1.15:1/1.15;vStart=tc-(cx-PAD.l)/(W-PAD.l-PAD.r)*span;}
+  refresh(true);
+},{passive:false});
+
+function setThr(v){
+  v=parseFloat(v);if(isNaN(v))return;
+  thr=Math.max(0,Math.min(13,Math.round(v*100)/100));save();
+  $('thrNum').value=thr;$('thrRange').value=thr;
+  draw();renderList();
+}
+$('thrNum').addEventListener('input',e=>setThr(e.target.value));
+$('thrRange').addEventListener('input',e=>setThr(e.target.value));
+$('prev').onclick=()=>{vStart-=DAY;cursor=null;refresh(true);};
+$('next').onclick=()=>{vStart+=DAY;cursor=null;refresh(true);};
+$('today').onclick=()=>{vStart=dayStart(Date.now());span=48*HOUR;cursor=null;refresh(true);};
+$('zoomIn').onclick=()=>{const c=vStart+span/2;span/=1.5;vStart=c-span/2;refresh(true);};
+$('zoomOut').onclick=()=>{const c=vStart+span/2;span*=1.5;vStart=c-span/2;refresh(true);};
+$('date').addEventListener('change',e=>{
+  const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(e.target.value);if(!m)return;
+  vStart=parisMidnight(+m[1],+m[2]-1,+m[3]);cursor=null;refresh(true);
+});
+function setOff(){
+  offT=parseFloat($('offT').value)||0;offH=parseFloat($('offH').value)||0;save();
+  draw();renderList();
+}
+$('offT').addEventListener('input',setOff);
+$('offH').addEventListener('input',setOff);
+$('reset').onclick=()=>{offT=0;offH=0;save();syncUI();draw();renderList();};
+window.addEventListener('resize',resize);
+if(window.matchMedia)window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change',draw);
+
+// démarrage : demain si disponible, sinon aujourd'hui
+vStart=dayStart(Date.now());
+resize();clampView();renderList();syncUI();draw();
+})();
+</script>
+</body>
+</html>
