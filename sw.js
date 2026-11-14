@@ -1,5 +1,5 @@
 // Service worker : l’appli s’ouvre même sans réseau ; index.html est rechargé en priorité depuis le réseau.
-const CACHE = "marees-sm-v3";
+const CACHE = "marees-sm-v4";
 const FILES = ["./", "index.html", "manifest.webmanifest", "logo.png", "favicon.png", "icon-192.png", "icon-512.png", "apple-touch-icon.png"];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));

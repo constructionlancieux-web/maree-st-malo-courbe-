@@ -79,6 +79,48 @@
   #gate button{margin-top:12px;width:100%;font:inherit;font-size:1.1rem;font-weight:800;padding:13px;border:0;border-radius:14px;color:#03261b;background:linear-gradient(180deg,#27e0a6,#12b886);cursor:pointer}
   #gate .err{min-height:1.4em;margin-top:10px;color:#ff9b7a;font-size:.95rem}
   #app{display:none}
+  #app{padding-bottom:92px}
+  #nav{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;justify-content:center;background:rgba(3,20,45,.94);
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid var(--bd);padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
+  #nav button{flex:1;max-width:140px;background:none;border:0;color:var(--mut);font:inherit;font-size:.72rem;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 2px;border-radius:12px;cursor:pointer}
+  #nav button .ic{font-size:1.3rem;line-height:1}
+  #nav button.on{color:#fff;background:rgba(43,196,255,.20)}
+  .tabsec{display:none}
+  .sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px}
+  .sp{position:relative;background:rgba(255,255,255,.08);border:1px solid var(--bd);border-radius:14px;padding:10px 6px;color:var(--txt);font:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:78px}
+  .sp:active{background:rgba(43,196,255,.28)}
+  .sp .e{font-size:1.55rem;line-height:1}
+  .sp .nm{font-weight:700;font-size:.86rem;text-align:center;line-height:1.1}
+  .sp .bd{position:absolute;top:5px;right:6px;background:var(--gr);color:#03261b;border-radius:99px;padding:0 7px;font-size:.78rem;font-weight:800}
+  .btn{font:inherit;color:var(--txt);background:rgba(255,255,255,.10);border:1px solid var(--bd);border-radius:12px;padding:8px 12px;cursor:pointer;font-weight:600;display:inline-block}
+  .btn:active{background:rgba(255,255,255,.2)}
+  .btn.red{border-color:#ff7a5c;color:#ffb199}
+  .btn.on{background:rgba(43,196,255,.28);border-color:var(--cy)}
+  .seg{display:flex;gap:6px;margin-bottom:10px}
+  .seg .btn{flex:1;text-align:center}
+  select,.fld{font:inherit;color:var(--txt);background:rgba(255,255,255,.10);border:1px solid var(--bd);border-radius:12px;padding:8px 10px;max-width:100%}
+  select option{color:#000}
+  #sheet{position:fixed;left:10px;right:10px;bottom:calc(78px + env(safe-area-inset-bottom));z-index:40;max-width:700px;margin:0 auto;background:rgba(6,30,66,.98);
+    border:1px solid var(--cy);border-radius:18px;padding:12px;display:none;box-shadow:0 10px 40px rgba(0,0,0,.6)}
+  #sheet .row2{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+  #sheet .cnt{display:flex;align-items:center;gap:6px;font-weight:800}
+  #sheet .cnt button{width:36px;height:36px;border-radius:50%;border:1px solid var(--bd);background:rgba(255,255,255,.12);color:var(--txt);font-size:1.2rem;cursor:pointer}
+  #sheet input.fld{width:90px}
+  .hrow{display:flex;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--bd);cursor:pointer}
+  .hth{width:44px;height:44px;flex:none;border-radius:10px;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:1.5rem;overflow:hidden}
+  .hth img{width:100%;height:100%;object-fit:cover}
+  .hmain{min-width:0}
+  .ttl2{font-weight:700;margin:12px 0 4px;color:#cfe6ff}
+  .brow{display:flex;align-items:center;gap:8px;margin:3px 0;font-size:.86rem}
+  .brow .bl{width:86px;flex:none;color:var(--mut)}
+  .brow .bt{flex:1;height:12px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}
+  .brow .bt i{display:block;height:100%;background:linear-gradient(90deg,#2bc4ff,#19d79a);border-radius:99px}
+  .brow .bv{width:30px;text-align:right;font-weight:700}
+  .kpis{display:flex;gap:8px;margin-bottom:6px}
+  .kpi{flex:1;background:rgba(255,255,255,.07);border:1px solid var(--bd);border-radius:14px;padding:8px;text-align:center}
+  .kpi b{display:block;font-size:1.4rem}
+  .kpi span{font-size:.75rem;color:var(--mut)}
+  .adv{background:rgba(25,215,154,.12);border:1px solid rgba(25,215,154,.5);border-radius:14px;padding:10px 12px;margin:8px 0;font-size:.95rem;line-height:1.45}
 </style>
 </head>
 <body>
@@ -103,6 +145,7 @@
   <img src="logo.png" alt="Logo">
 </header>
 
+<section id="tab-marees">
 <div class="daterow">
   <button class="navbtn" id="prev" aria-label="Jour précédent">◀</button>
   <div class="datepill">
@@ -137,6 +180,22 @@
 </div>
 
 <div class="card small" id="foot"></div>
+</section>
+<section id="tab-mer" class="tabsec"></section>
+<section id="tab-pied" class="tabsec"></section>
+<section id="tab-stats" class="tabsec"></section>
+<section id="tab-points" class="tabsec"></section>
+
+<div id="sheet"></div>
+
+<nav id="nav">
+  <button data-t="marees" class="on"><span class="ic">🌊</span>Marées</button>
+  <button data-t="mer"><span class="ic">🎣</span>Mer</button>
+  <button data-t="pied"><span class="ic">🦀</span>À pied</button>
+  <button data-t="stats"><span class="ic">📊</span>Stats</button>
+  <button data-t="points"><span class="ic">📍</span>Points</button>
+</nav>
+
 </div>
 
 <script>
@@ -146,7 +205,7 @@
 /* ================= CONFIGURATION ================= */
 // Adresse du script Google Apps Script qui vérifie les codes d’accès (voir le fichier acces-apps-script.gs).
 // Laisse vide pour ouvrir l’appli sans code.
-const ACCESS_URL="https://script.google.com/macros/s/AKfycbz9FeOK2Vl-DygdcS8ED5NXb0BNmlPdpIkiXu0yQANKAQeJhOl6FFH-bfs5fEv0bDnI/exec";
+const ACCESS_URL="";
 const LAT=48.6498, LON=-2.0260;
 const WX_URL="https://api.open-meteo.com/v1/forecast?latitude="+LAT+"&longitude="+LON+"&hourly=wind_speed_10m,wind_direction_10m,wind_gusts_10m&wind_speed_unit=kmh&timezone=Europe%2FParis&forecast_days=8";
 // points en mer proches de Saint-Malo : le premier qui renvoie des valeurs est utilisé
@@ -614,6 +673,345 @@ function bind(){
   window.addEventListener("resize",resize);
 }
 
+/* ================= PÊCHE : PRISES, STATS, POINTS ================= */
+const SP_MER=[["Bar","🐟"],["Lieu jaune","🐟"],["Lieu noir","🐟"],["Maquereau","🐟"],["Chinchard","🐟"],["Orphie","🐟"],["Dorade grise","🐟"],["Dorade royale","🐟"],["Sar","🐟"],["Vieille","🐟"],["Tacaud","🐟"],["Merlan","🐟"],["Rouget barbet","🐟"],["Mulet","🐟"],["Grondin","🐟"],["Sole","🐟"],["Plie","🐟"],["Limande","🐟"],["Turbot","🐟"],["Barbue","🐟"],["Raie","🐟"],["Roussette","🐟"],["Congre","🐟"],["Seiche","🦑"],["Calmar","🦑"],["Vive","⚠️"],["Autre","❔"]];
+const SP_PIED=[["Coque","🐚"],["Palourde","🐚"],["Praire","🐚"],["Huître creuse","🦪"],["Huître plate","🦪"],["Moule","🦪"],["Bigorneau","🐚"],["Bulot","🐚"],["Patelle","🐚"],["Couteau","🐚"],["Telline","🐚"],["Crevette grise","🦐"],["Crevette rose","🦐"],["Étrille","🦀"],["Tourteau","🦀"],["Araignée de mer","🦀"],["Autre","❔"]];
+const emojiOf=(kind,sp)=>{const l=kind==="pied"?SP_PIED:SP_MER;const f=l.find(x=>x[0]===sp);return f?f[1]:"🐟";};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fMo=new Intl.DateTimeFormat("fr-FR",{timeZone:TZ,month:"short",year:"2-digit"});
+
+let DB={catches:[],spots:[]};
+try{const s=JSON.parse(localStorage.getItem("maree-peche-v1")||"null");if(s&&Array.isArray(s.catches)){DB={catches:s.catches,spots:Array.isArray(s.spots)?s.spots:[]};}}catch(e){}
+function saveDB(){try{localStorage.setItem("maree-peche-v1",JSON.stringify(DB));}catch(e){}}
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const findC=id=>DB.catches.find(c=>c.id===id);
+const spotName=id=>{const s=DB.spots.find(x=>x.id===id);return s?s.name:"";};
+
+/* ---- contexte de marée au moment d’une prise ---- */
+function tideCtx(ms){
+  if(ms<Tm[0]||ms>Tm[N-1]-6*HOUR)return null;
+  const i=idxAfter(ms);
+  if(i<=0||i>=N)return null;
+  const phase=isHigh(i)?"montant":"descendant";
+  let best=-1,bd=1e18;
+  for(let k=Math.max(0,i-3);k<=Math.min(N-1,i+3);k++){if(isHigh(k)){const d=Math.abs(Tm[k]-ms);if(d<bd){bd=d;best=k;}}}
+  return {phase:phase,h:Math.round(height(ms)*100)/100,dt:best>=0?Math.round((ms-Tm[best])/MIN):null,coef:best>=0&&CF[best]?CF[best]:null,est:ms>LAST_REAL};
+}
+function lightAt(ms){
+  const e=sunEvents(dayStart(ms)),a=40*MIN;
+  if(Math.abs(ms-e.rise)<=a)return "aube";
+  if(Math.abs(ms-e.set)<=a)return "crépuscule";
+  return (ms>e.rise&&ms<e.set)?"jour":"nuit";
+}
+function wxAt(ms){
+  const o={};
+  const wi=nearestIdx(WX&&WX.t,ms);
+  if(wi>=0&&typeof WX.ws[wi]==="number"){o.wind=Math.round(WX.ws[wi]);o.wdir=Math.round(WX.wd[wi]);}
+  const si=nearestIdx(SEA&&SEA.t,ms);
+  if(si>=0&&typeof SEA.wh[si]==="number")o.wave=Math.round(SEA.wh[si]*10)/10;
+  return o;
+}
+function fmtDur(min){const a=Math.abs(min),h=Math.floor(a/60),m=a%60;return h?(h+" h "+pad(m)):(m+" min");}
+function describeTide(c){
+  const t=c.tide;if(!t)return "marée indisponible à cette date";
+  let s=nf(t.h)+" m · "+t.phase;
+  if(t.dt!==null)s+=Math.abs(t.dt)<10?" · à la pleine mer":" · "+fmtDur(t.dt)+(t.dt<0?" avant":" après")+" la pleine mer";
+  if(t.coef)s+=" · coef "+(t.est?"~":"")+t.coef;
+  if(c.wind!==undefined)s+=" · vent "+c.wind+" km/h";
+  if(c.wave!==undefined)s+=" · houle "+n1(c.wave)+" m";
+  return s;
+}
+function dm(v,pos,neg){const a=Math.abs(v),d=Math.floor(a),m=(a-d)*60;return (v>=0?pos:neg)+" "+d+"°"+m.toFixed(3).padStart(6,"0")+"′";}
+function gpsText(c){
+  if(c.lat!==null&&c.lat!==undefined)return "📍 "+dm(c.lat,"N","S")+" "+dm(c.lon,"E","O")+(c.acc?" (±"+c.acc+" m)":"")+(c.spot?" · "+esc(spotName(c.spot)):"");
+  return c.nogps?"📍 position indisponible (GPS refusé ou sans signal)":"📍 recherche de la position…";
+}
+
+/* ---- GPS et points ---- */
+function getPos(){
+  return new Promise(res=>{
+    if(!navigator.geolocation){res(null);return;}
+    navigator.geolocation.getCurrentPosition(p=>res({lat:p.coords.latitude,lon:p.coords.longitude,acc:Math.round(p.coords.accuracy)}),()=>res(null),{enableHighAccuracy:true,timeout:20000,maximumAge:30000});
+  });
+}
+function dist(la1,lo1,la2,lo2){const R=6371000,r=Math.PI/180,x=(la2-la1)*r,y=(lo2-lo1)*r*Math.cos((la1+la2)/2*r);return Math.sqrt(x*x+y*y)*R;}
+function assignSpot(lat,lon){
+  let best=null,bd=1e9;
+  for(const s of DB.spots){const d=dist(lat,lon,s.lat,s.lon);if(d<bd){bd=d;best=s;}}
+  if(best&&bd<=150)return best.id;
+  const s={id:uid(),name:"Point "+(DB.spots.length+1),lat:lat,lon:lon,t:Date.now()};
+  DB.spots.push(s);return s.id;
+}
+
+/* ---- photos (IndexedDB, restent sur le téléphone) ---- */
+function idb(){return new Promise((res,rej)=>{const r=indexedDB.open("maree-peche",1);r.onupgradeneeded=()=>r.result.createObjectStore("photos");r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});}
+async function putPhoto(id,blob){const db=await idb();return new Promise((res,rej)=>{const tx=db.transaction("photos","readwrite");tx.objectStore("photos").put(blob,id);tx.oncomplete=()=>res();tx.onerror=()=>rej(tx.error);});}
+async function getPhoto(id){const db=await idb();return new Promise((res,rej)=>{const r=db.transaction("photos","readonly").objectStore("photos").get(id);r.onsuccess=()=>res(r.result||null);r.onerror=()=>rej(r.error);});}
+async function delPhoto(id){try{const db=await idb();db.transaction("photos","readwrite").objectStore("photos").delete(id);}catch(e){}}
+function shrinkImage(file,maxPx){
+  return new Promise((res,rej)=>{
+    const img=new Image(),url=URL.createObjectURL(file);
+    img.onload=()=>{
+      const k=Math.min(1,maxPx/Math.max(img.width,img.height)),w=Math.round(img.width*k),h=Math.round(img.height*k);
+      const c=document.createElement("canvas");c.width=w;c.height=h;c.getContext("2d").drawImage(img,0,0,w,h);
+      URL.revokeObjectURL(url);c.toBlob(b=>b?res(b):rej(new Error("photo")),"image/jpeg",0.72);
+    };
+    img.onerror=()=>{URL.revokeObjectURL(url);rej(new Error("photo"));};
+    img.src=url;
+  });
+}
+
+/* ---- enregistrer une prise ---- */
+function addCatch(kind,sp){
+  const t=Date.now();
+  const c={id:uid(),t:t,kind:kind,sp:sp,n:1,size:null,lat:null,lon:null,acc:null,spot:null,tide:tideCtx(t),light:lightAt(t),moon:Math.round(moonAge(t)*1000)/1000};
+  Object.assign(c,wxAt(t));
+  DB.catches.push(c);saveDB();
+  showSheet(c.id);refreshPeche();
+  getPos().then(p=>{
+    if(!findC(c.id))return;
+    if(p){c.lat=p.lat;c.lon=p.lon;c.acc=p.acc;c.spot=assignSpot(p.lat,p.lon);}else{c.nogps=true;}
+    saveDB();updateSheetGps(c.id);refreshPeche();
+  });
+}
+
+/* ---- fenêtre de la dernière prise ---- */
+let sheetId=null;
+function showSheet(id){sheetId=id;renderSheet();$("sheet").style.display="block";}
+function hideSheet(){sheetId=null;$("sheet").style.display="none";}
+function updateSheetGps(id){if(sheetId===id&&$("shGps")){const c=findC(id);if(c)$("shGps").innerHTML=gpsText(c);}}
+function renderSheet(){
+  const c=findC(sheetId);if(!c){hideSheet();return;}
+  $("sheet").innerHTML=
+    '<div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><div style="min-width:0">'+
+    '<div style="font-weight:800;font-size:1.1rem">✔ '+emojiOf(c.kind,c.sp)+" "+esc(c.sp)+" · "+hhmm(c.t)+'</div>'+
+    '<div class="small">'+esc(describeTide(c))+'</div><div class="small" id="shGps">'+gpsText(c)+'</div></div>'+
+    '<button class="btn" id="shClose">OK</button></div>'+
+    '<div class="row2"><div class="cnt"><button id="shMinus">−</button><span id="shN">'+(c.n||1)+'</span><button id="shPlus">+</button></div>'+
+    (c.kind==="mer"?'<input class="fld" id="shSize" type="number" inputmode="decimal" min="0" step="1" placeholder="cm" value="'+(c.size||"")+'">':"")+
+    '<button class="btn" id="shPhoto">📷 Photo'+(c.ph?" ✓":"")+'</button><input id="shFile" type="file" accept="image/*" capture="environment" hidden>'+
+    '<button class="btn red" id="shDel">🗑 Supprimer</button></div>';
+  $("shClose").onclick=()=>{hideSheet();refreshPeche();};
+  $("shMinus").onclick=()=>{c.n=Math.max(1,(c.n||1)-1);$("shN").textContent=c.n;saveDB();refreshPeche();};
+  $("shPlus").onclick=()=>{c.n=(c.n||1)+1;$("shN").textContent=c.n;saveDB();refreshPeche();};
+  const sz=$("shSize");if(sz)sz.oninput=()=>{const v=parseFloat(String(sz.value).replace(",","."));c.size=isNaN(v)?null:v;saveDB();};
+  $("shPhoto").onclick=()=>$("shFile").click();
+  $("shFile").onchange=async e=>{
+    const f=e.target.files&&e.target.files[0];if(!f)return;
+    try{const b=await shrinkImage(f,900);await putPhoto(c.id,b);c.ph=true;saveDB();renderSheet();refreshPeche();}
+    catch(err){$("shGps").innerHTML="Photo impossible à enregistrer.";}
+  };
+  $("shDel").onclick=()=>{
+    if(!confirm("Supprimer cette prise ?"))return;
+    DB.catches=DB.catches.filter(x=>x.id!==c.id);delPhoto(c.id);saveDB();hideSheet();refreshPeche();
+  };
+}
+
+/* ---- prochaines marées ---- */
+function coefNear(i){let best=0,bd=1e18;for(let k=Math.max(0,i-2);k<=Math.min(N-1,i+2);k++){if(isHigh(k)&&CF[k]){const d=Math.abs(Tm[k]-Tm[i]);if(d<bd){bd=d;best=k;}}}return best?{c:CF[best],est:EST[best]===1}:null;}
+function nextTides(high,count){
+  const out=[],now=Date.now();
+  for(let i=idxAfter(now);i<N&&out.length<count;i++){
+    if(isHigh(i)===high){const cf=coefNear(i);out.push({t:Tm[i],h:Hm[i],coef:cf?cf.c:null,est:cf?cf.est:false});}
+  }
+  return out;
+}
+function tideCard(kind){
+  const tc=tideCtx(Date.now());
+  let h="";
+  if(tc)h+='<div style="font-size:1.02rem"><b>Maintenant :</b> '+nf(tc.h)+" m · <b>"+tc.phase+"</b>"+(tc.dt!==null?" · "+(Math.abs(tc.dt)<10?"pleine mer":fmtDur(tc.dt)+(tc.dt<0?" avant":" après")+" la PM"):"")+(tc.coef?" · coef "+(tc.est?"~":"")+tc.coef:"")+"</div>";
+  else h+='<div class="small">Marée indisponible.</div>';
+  const pied=kind==="pied";
+  const lst=nextTides(!pied,pied?4:3);
+  h+='<div class="small" style="margin-top:6px">'+(pied?"Prochaines basses mers :":"Prochaines pleines mers :")+"</div>";
+  h+=lst.map(x=>'<div style="font-size:.92rem">'+cap(fDS.format(new Date(x.t)))+" "+hhmm(x.t)+" · "+nf(x.h)+" m"+(x.coef?" · coef "+(x.est?"~":"")+x.coef:"")+(pied&&x.coef>=90?" · <b style='color:#2cf0b0'>grande marée</b>":"")+"</div>").join("");
+  return h;
+}
+
+/* ---- onglets Mer et À pied ---- */
+function todayCount(kind,sp){const k=keyOf(Date.now());let n=0;for(const c of DB.catches)if(c.kind===kind&&c.sp===sp&&keyOf(c.t)===k)n+=c.n||1;return n;}
+function histHtml(kind){
+  const rows=DB.catches.filter(c=>c.kind===kind).sort((a,b)=>b.t-a.t).slice(0,10);
+  if(!rows.length)return '<div class="small">Aucune prise pour l’instant. Touche une espèce quand tu en prends une.</div>';
+  return rows.map(c=>'<div class="hrow" data-id="'+c.id+'"><div class="hth">'+(c.ph?'<img data-ph="'+c.id+'" alt="">':emojiOf(kind,c.sp))+'</div><div class="hmain"><b>'+esc(c.sp)+(c.n>1?" ×"+c.n:"")+(c.size?" · "+c.size+" cm":"")+'</b><div class="small">'+esc(fDS.format(new Date(c.t)))+" "+hhmm(c.t)+" · "+esc(describeTide(c))+(c.spot?" · "+esc(spotName(c.spot)):"")+"</div></div></div>").join("");
+}
+function renderKind(kind){
+  const box=$(kind==="pied"?"tab-pied":"tab-mer");
+  const list=kind==="pied"?SP_PIED:SP_MER;
+  let h='<div class="card"><div class="ttl">'+(kind==="pied"?"🦀 Pêche à pied":"🎣 Pêche en mer")+'</div>'+tideCard(kind)+"</div>";
+  h+='<div class="card"><div class="ttl">Je viens de prendre…</div><div class="small" style="margin-bottom:8px">Un appui = une prise, enregistrée avec l’heure, la marée (hauteur, montant ou descendant, écart à la pleine mer, coefficient) et ta position GPS.'+(kind==="pied"?" Vérifie les tailles minimales, les quotas et la qualité sanitaire de la zone avant de ramasser.":"")+'</div><div class="sgrid">';
+  for(const [nm,em] of list){const n=todayCount(kind,nm);h+='<button class="sp" data-sp="'+esc(nm)+'">'+(n?'<span class="bd">'+n+"</span>":"")+'<span class="e">'+em+'</span><span class="nm">'+esc(nm)+"</span></button>";}
+  h+="</div></div>";
+  h+='<div class="card"><div class="ttl">Dernières prises</div>'+histHtml(kind)+"</div>";
+  box.innerHTML=h;
+  box.querySelectorAll(".sp").forEach(b=>b.addEventListener("click",()=>addCatch(kind,b.dataset.sp)));
+  box.querySelectorAll(".hrow").forEach(r=>r.addEventListener("click",()=>showSheet(r.dataset.id)));
+  box.querySelectorAll("img[data-ph]").forEach(async img=>{try{const b=await getPhoto(img.dataset.ph);if(b)img.src=URL.createObjectURL(b);}catch(e){}});
+}
+
+/* ---- statistiques ---- */
+let ST={kind:"tout",sp:""};
+function bars(title,rows){
+  const max=Math.max(1,...rows.map(r=>r[1]));
+  return '<div class="ttl2">'+title+"</div>"+rows.map(r=>'<div class="brow"><span class="bl">'+esc(r[0])+'</span><span class="bt"><i style="width:'+Math.round(r[1]/max*100)+'%"></i></span><span class="bv">'+r[1]+"</span></div>").join("");
+}
+const sg2=h=>h===0?"PM":(h<0?"−"+(-h)+"h":"+"+h+"h");
+const sgn=h=>h<0?"−"+(-h)+" h":h>0?"+"+h+" h":"";
+function adviceHtml(list,sp){
+  const ev=list.filter(c=>c.tide&&c.tide.dt!==null);
+  if(ev.length<3)return '<div class="adv">Pour proposer un créneau pour « '+esc(sp)+' », il faut au moins 3 prises avec la marée connue ('+ev.length+" pour l’instant).</div>";
+  const w=new Array(12).fill(0);
+  ev.forEach(c=>{const b=Math.max(-6,Math.min(5,Math.floor(c.tide.dt/60)));w[b+6]+=c.n||1;});
+  let bi=0,bv=-1;for(let i=0;i<=9;i++){const s=w[i]+w[i+1]+w[i+2];if(s>bv){bv=s;bi=i;}}
+  const tot=w.reduce((a,b)=>a+b,0),share=Math.round(bv/tot*100);
+  const a=bi-6,b=a+3;
+  let mont=0,desc=0;ev.forEach(c=>{if(c.tide.phase==="montant")mont+=c.n||1;else desc+=c.n||1;});
+  const ph=mont>=desc?"montant":"descendant",phs=Math.round(Math.max(mont,desc)/(mont+desc)*100);
+  const lo=a===0?"PM":"PM "+sgn(a),hi=b===0?"PM":"PM "+sgn(b);
+  let h='<div class="adv"><b>'+esc(sp)+"</b> : "+share+" % de tes prises entre "+lo+" et "+hi+", "+phs+" % à marée "+ph+" ("+ev.length+" prise"+(ev.length>1?"s":"")+" analysée"+(ev.length>1?"s":"")+").";
+  if(ev.length<10)h+=" <span class=\"small\">Peu de données : à confirmer avec plus de sorties.</span>";
+  const out=[],now=Date.now();
+  for(let i=idxAfter(now-6*HOUR);i<N&&out.length<3;i++){
+    if(!isHigh(i))continue;
+    const s=Tm[i]+a*HOUR,e=Tm[i]+b*HOUR;if(e<now)continue;
+    out.push(cap(fDS.format(new Date(s)))+" "+hhmm(s)+"–"+hhmm(e)+" (PM "+hhmm(Tm[i])+(CF[i]?", coef "+(EST[i]?"~":"")+CF[i]:"")+")");
+  }
+  if(out.length)h+='<div style="margin-top:6px"><b>Prochains créneaux :</b><br>'+out.join("<br>")+"</div>";
+  return h+"</div>";
+}
+function renderStats(){
+  const box=$("tab-stats");
+  const base=DB.catches.filter(c=>ST.kind==="tout"||c.kind===ST.kind);
+  const spc={};base.forEach(c=>spc[c.sp]=(spc[c.sp]||0)+(c.n||1));
+  const spl=Object.keys(spc).sort((a,b)=>spc[b]-spc[a]);
+  if(ST.sp&&!spc[ST.sp])ST.sp="";
+  const list=base.filter(c=>!ST.sp||c.sp===ST.sp);
+  const total=list.reduce((s,c)=>s+(c.n||1),0);
+  const days=new Set(list.map(c=>keyOf(c.t))).size;
+  let h='<div class="card"><div class="ttl">📊 Mes statistiques</div><div class="seg">'+
+    [["tout","Tout"],["mer","Mer"],["pied","À pied"]].map(x=>'<button class="btn'+(ST.kind===x[0]?" on":"")+'" data-k="'+x[0]+'">'+x[1]+"</button>").join("")+"</div>"+
+    '<select id="stSp"><option value="">Toutes les espèces</option>'+spl.map(s=>'<option value="'+esc(s)+'"'+(s===ST.sp?" selected":"")+">"+esc(s)+" ("+spc[s]+")</option>").join("")+"</select>";
+  if(!list.length){
+    h+='<div class="small" style="margin-top:10px">Pas encore de prise enregistrée. Va dans l’onglet Mer ou À pied et touche une espèce quand tu en prends une : les statistiques se remplissent toutes seules.</div></div>';
+  }else{
+    h+='<div class="kpis" style="margin-top:10px"><div class="kpi"><b>'+total+"</b><span>prises</span></div><div class=\"kpi\"><b>"+days+"</b><span>sortie"+(days>1?"s":"")+'</span></div><div class="kpi"><b>'+(spl[0]?esc(spl[0]):"—")+"</b><span>espèce n°1</span></div></div>";
+    if(ST.sp)h+=adviceHtml(list,ST.sp);else h+='<div class="small" style="margin-top:8px">Choisis une espèce pour obtenir un conseil de créneau.</div>';
+    const ev=list.filter(c=>c.tide);
+    if(ev.length){
+      const hb=new Array(12).fill(0);ev.forEach(c=>{if(c.tide.dt!==null){const b=Math.max(-6,Math.min(5,Math.floor(c.tide.dt/60)));hb[b+6]+=c.n||1;}});
+      h+=bars("Heures avant (−) et après (+) la pleine mer",hb.map((v,i)=>[sg2(i-6)+" à "+sg2(i-5),v]));
+      let m=0,d=0;ev.forEach(c=>{if(c.tide.phase==="montant")m+=c.n||1;else d+=c.n||1;});
+      h+=bars("Montant ou descendant",[["Montant",m],["Descendant",d]]);
+      const hh=new Array(7).fill(0);ev.forEach(c=>{hh[Math.min(6,Math.floor(c.tide.h/2))]+=c.n||1;});
+      h+=bars("Hauteur d’eau",hh.map((v,i)=>[i===6?"12 m et +":(i*2)+"–"+(i*2+2)+" m",v]));
+      const cb=[0,0,0,0];ev.forEach(c=>{if(c.tide.coef){const k=c.tide.coef<45?0:c.tide.coef<70?1:c.tide.coef<95?2:3;cb[k]+=c.n||1;}});
+      h+=bars("Coefficient",[["< 45",cb[0]],["45 à 69",cb[1]],["70 à 94",cb[2]],["95 et +",cb[3]]]);
+    }
+    const lb={aube:0,jour:0,"crépuscule":0,nuit:0};list.forEach(c=>{if(c.light&&lb[c.light]!==undefined)lb[c.light]+=c.n||1;});
+    h+=bars("Moment de la journée",[["Aube",lb.aube],["Jour",lb.jour],["Crépuscule",lb["crépuscule"]],["Nuit",lb.nuit]]);
+    const mb={};list.forEach(c=>{const k=keyOf(c.t).slice(0,7);mb[k]=(mb[k]||0)+(c.n||1);});
+    h+=bars("Par mois",Object.keys(mb).sort().map(k=>[fMo.format(new Date(parseLocal(k+"-15T12:00"))),mb[k]]));
+    const sb={};list.forEach(c=>{if(c.spot){const k=spotName(c.spot);sb[k]=(sb[k]||0)+(c.n||1);}});
+    const sk=Object.keys(sb).sort((a,b)=>sb[b]-sb[a]);
+    if(sk.length)h+=bars("Par point de pêche",sk.map(k=>[k,sb[k]]));
+    h+="</div>";
+  }
+  h+='<div class="card"><div class="ttl">Sauvegarde</div><div class="small" style="margin-bottom:8px">Tes prises sont enregistrées sur ce téléphone seulement. Fais une sauvegarde de temps en temps (si tu effaces les données du navigateur, elles disparaissent).</div><div class="chips"><button class="btn" id="exCsv">Exporter en tableau (CSV)</button><button class="btn" id="exJson">Sauvegarde (JSON)</button><button class="btn" id="imJson">Importer une sauvegarde</button><input id="imFile" type="file" accept="application/json,.json" hidden></div></div>';
+  box.innerHTML=h;
+  box.querySelectorAll("[data-k]").forEach(b=>b.addEventListener("click",()=>{ST.kind=b.dataset.k;renderStats();}));
+  $("stSp").onchange=e=>{ST.sp=e.target.value;renderStats();};
+  $("exCsv").onclick=exportCSV;$("exJson").onclick=exportJSON;
+  $("imJson").onclick=()=>$("imFile").click();
+  $("imFile").onchange=importJSON;
+}
+
+/* ---- sauvegardes ---- */
+function download(name,type,text){const b=new Blob(["\ufeff"+text],{type:type+";charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1500);}
+function csvEsc(v){v=(v===null||v===undefined)?"":String(v);return /[";\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}
+function exportCSV(){
+  const head=["date","heure","type","espece","nombre","taille_cm","latitude","longitude","point","hauteur_eau_m","phase","minutes_apres_PM","coef","vent_kmh","houle_m","lumiere"];
+  const rows=DB.catches.slice().sort((a,b)=>a.t-b.t).map(c=>[keyOf(c.t),hhmm(c.t),c.kind==="pied"?"pied":"mer",c.sp,c.n||1,c.size,c.lat,c.lon,c.spot?spotName(c.spot):"",c.tide?c.tide.h:"",c.tide?c.tide.phase:"",c.tide&&c.tide.dt!==null?c.tide.dt:"",c.tide&&c.tide.coef?c.tide.coef:"",c.wind,c.wave,c.light]);
+  download("peche-saint-malo.csv","text/csv",[head].concat(rows).map(r=>r.map(csvEsc).join(";")).join("\n"));
+}
+function exportJSON(){download("peche-saint-malo-sauvegarde.json","application/json",JSON.stringify(DB));}
+function importJSON(e){
+  const f=e.target.files&&e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const s=JSON.parse(String(r.result).replace(/^\ufeff/,""));
+      if(!s||!Array.isArray(s.catches))throw new Error("format");
+      const ids=new Set(DB.catches.map(c=>c.id)),sids=new Set(DB.spots.map(x=>x.id));
+      let add=0;s.catches.forEach(c=>{if(c&&c.id&&!ids.has(c.id)){DB.catches.push(c);add++;}});
+      (s.spots||[]).forEach(x=>{if(x&&x.id&&!sids.has(x.id))DB.spots.push(x);});
+      saveDB();alert(add+" prise(s) importée(s).");renderStats();
+    }catch(err){alert("Fichier de sauvegarde non reconnu.");}
+  };
+  r.readAsText(f);
+}
+
+/* ---- onglet Points ---- */
+function copyText(t){
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(()=>alert("Copié : "+t),()=>prompt("Copie ces coordonnées :",t));}
+  else prompt("Copie ces coordonnées :",t);
+}
+function renderPoints(){
+  const box=$("tab-points");
+  let h='<div class="card"><div class="ttl">📍 Mes points de pêche</div><div class="small">Chaque prise avec position GPS est rattachée au point le plus proche (moins de 150 m), sinon un nouveau point est créé. Tu peux les renommer.</div><div style="margin-top:8px"><button class="btn" id="ptAdd">📍 Enregistrer ma position comme point</button></div></div>';
+  if(!DB.spots.length)h+='<div class="card small">Aucun point pour l’instant.</div>';
+  for(const s of DB.spots){
+    const cs=DB.catches.filter(c=>c.spot===s.id);
+    const tot=cs.reduce((a,c)=>a+(c.n||1),0);
+    const sp={};cs.forEach(c=>sp[c.sp]=(sp[c.sp]||0)+(c.n||1));
+    const top=Object.keys(sp).sort((a,b)=>sp[b]-sp[a]).slice(0,4).map(k=>k+" ("+sp[k]+")").join(", ");
+    h+='<div class="card"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><div class="ttl" style="margin:0">📍 '+esc(s.name)+'</div><button class="btn" data-ren="'+s.id+'">✏️</button></div>'+
+      '<div style="margin:6px 0"><b>'+dm(s.lat,"N","S")+" · "+dm(s.lon,"E","O")+'</b><div class="small">'+s.lat.toFixed(5)+", "+s.lon.toFixed(5)+"</div></div>"+
+      '<div class="small">'+tot+" prise"+(tot>1?"s":"")+(top?" · "+esc(top):"")+"</div>"+
+      '<div class="chips" style="margin-top:8px"><button class="btn" data-copy="'+s.id+'">Copier GPS</button>'+
+      '<a class="btn" style="text-decoration:none" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&amp;query='+s.lat+","+s.lon+'">Ouvrir dans Maps</a>'+
+      '<button class="btn red" data-del="'+s.id+'">Supprimer</button></div></div>';
+  }
+  box.innerHTML=h;
+  $("ptAdd").onclick=async()=>{
+    const p=await getPos();if(!p){alert("Position indisponible : vérifie que la localisation est autorisée pour ce site.");return;}
+    const id=assignSpot(p.lat,p.lon);saveDB();renderPoints();
+  };
+  box.querySelectorAll("[data-ren]").forEach(b=>b.addEventListener("click",()=>{
+    const s=DB.spots.find(x=>x.id===b.dataset.ren);if(!s)return;
+    const n=prompt("Nom du point :",s.name);if(n&&n.trim()){s.name=n.trim();saveDB();renderPoints();}
+  }));
+  box.querySelectorAll("[data-copy]").forEach(b=>b.addEventListener("click",()=>{
+    const s=DB.spots.find(x=>x.id===b.dataset.copy);if(s)copyText(s.lat.toFixed(5)+", "+s.lon.toFixed(5));
+  }));
+  box.querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click",()=>{
+    const s=DB.spots.find(x=>x.id===b.dataset.del);if(!s||!confirm("Supprimer le point « "+s.name+" » ? Les prises restent enregistrées."))return;
+    DB.spots=DB.spots.filter(x=>x.id!==s.id);DB.catches.forEach(c=>{if(c.spot===s.id)c.spot=null;});saveDB();renderPoints();
+  }));
+}
+
+/* ---- navigation par onglets ---- */
+let TAB="marees";
+function showTab(n){
+  TAB=n;
+  for(const t of ["marees","mer","pied","stats","points"]){const el=$("tab-"+t);if(el)el.style.display=(t===n)?"block":"none";}
+  document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.t===n));
+  if(n!=="mer"&&n!=="pied")hideSheet();
+  window.scrollTo(0,0);
+  if(n==="marees"){resize();refresh(true);}
+  refreshPeche();
+}
+function refreshPeche(){
+  if(TAB==="mer")renderKind("mer");
+  else if(TAB==="pied")renderKind("pied");
+  else if(TAB==="stats")renderStats();
+  else if(TAB==="points")renderPoints();
+}
+function initPeche(){
+  document.querySelectorAll("#nav button").forEach(b=>b.addEventListener("click",()=>showTab(b.dataset.t)));
+  setInterval(()=>{if(TAB==="mer"||TAB==="pied")refreshPeche();},60000);
+}
+
+
 /* ================= DÉMARRAGE DE L’APPLI ================= */
 let started=false;
 function startApp(){
@@ -624,6 +1022,7 @@ function startApp(){
   vStart=Math.max(RANGE_MIN,dayStart(Date.now()));span=24*HOUR;
   bind();resize();clampView();renderHeader();renderList();renderWx();draw();
   loadWx();
+  initPeche();
   if("serviceWorker" in navigator){try{navigator.serviceWorker.register("sw.js");}catch(e){}}
 }
 
